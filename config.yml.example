@@ -1,5 +1,5 @@
 machine_groups:
-  - name: fast
+  - name: testqueue
     provider: gcloud
     timeout: "30m"
     max: 10

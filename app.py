@@ -56,7 +56,7 @@ def create_machine(item):
         if type(timeout) is str:
             timeout = timeparse(timeout)
         if timeout:
-            threading.Timer(timeout, delete_machine, [name])
+            threading.Timer(timeout, delete_machine, [name]).start()
 
         print(f'Success creating machine: {name}')
     except:
