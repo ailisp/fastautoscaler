@@ -70,7 +70,7 @@ def create_machine(item):
         print(f'Success creating machine: {name}')
     except:
         print(f'Error creating machine: {name}')
-        print(sys.exc_info()[0])
+        print(sys.exc_info())
         del machines[name]
 
 
