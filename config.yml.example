@@ -1,0 +1,17 @@
+machine_groups:
+  - name: fast
+    provider: gcloud
+    timeout: "30m"
+    max: 10
+    spec:    
+      disk_size: "100G"
+      machine_type: n1-standard-4
+      zone: us-west2-a
+      image_project: ubuntu-os-cloud
+      image_family: ubuntu-1804-lts
+      reserve_ip: false
+  - name: cheap
+    provider: aws
+    spec:
+      os: "Ubuntu 18.04 LTS"
+      instance_type: t2.micro
