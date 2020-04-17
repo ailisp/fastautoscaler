@@ -1,7 +1,7 @@
 import yaml
 from flask import Flask, jsonify, request, escape, abort
 import rc
-from rc import run
+from rc import run, pmap
 from queue import Queue
 import threading
 import uuid
@@ -56,7 +56,7 @@ def create_machine(item):
         if type(timeout) is str:
             timeout = timeparse(timeout)
         if timeout:
-            threading.Timer(timeout, delete_machine, [item])
+            threading.Timer(timeout, delete_machine, [name])
 
         print(f'Success creating machine: {name}')
     except:
@@ -65,8 +65,7 @@ def create_machine(item):
         del machines[name]
 
 
-def delete_machine(item):
-    name = item['machine_name']
+def delete_machine(name):
     if machines.get(name):
         machine = machines[name]
         machine['status'] = 'deleting'
@@ -92,7 +91,7 @@ def worker():
         if item['type'] == 'create':
             create_machine(item)
         elif item['type'] == 'delete':
-            delete_machine(item)
+            delete_machine(item['machine_name'])
         task_queue.task_done()
 
 
@@ -148,3 +147,21 @@ def release_machine(name):
     task_queue.put({"type": "delete",
                     "machine_name": name})
     return jsonify(None)
+
+
+def atexit_cleanup():
+    print('Drain task_queue')
+    try:
+        while task_queue.get(block=False):
+            task_queue.task_done()
+    except:
+        pass
+
+    print('Shutdown worker threads')
+    for _ in range(num_worker_threads):
+        task_queue.put(None)
+
+    pmap(delete_machine, machines.keys())
+
+
+atexit.register(atexit_cleanup)
