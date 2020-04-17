@@ -1,3 +1,4 @@
+auth_token: "81d659afb19b99c72eeab442d669634c"
 machine_groups:
   - name: testqueue
     provider: gcloud

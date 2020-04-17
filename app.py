@@ -20,7 +20,7 @@ for mg in config['machine_groups']:
     machine_groups[mg['name']] = mg
 
 machines = SqliteDict('./machines.sqlite', autocommit=True)
-print(machines)
+print(list(machines.iterkeys()))
 
 task_queue = Queue()
 
@@ -50,6 +50,15 @@ def create_machine(item):
         getattr(rc, mg['provider']).create(
             name=name, **mg['spec'])
         created_at = datetime.datetime.utcnow()
+        init_script = item.get('init_script')
+        if init_script:
+            machines[name] = {
+                'status': 'initializing', **item
+            }
+            p = getattr(rc, mg['provider']).get(name).run(
+                'bash', input=f'set -euo pipefail\n{init_script}')
+            if p.returncode != 0:
+                raise Exception(p.stderr)
         machines[name] = {
             'status': 'running', **item, 'created_at': datetime.datetime.utcnow().isoformat() + created_at.isoformat() + 'Z'}
         timeout = mg.get('timeout')
@@ -89,6 +98,7 @@ def worker():
         if item is None:
             break
         if item['type'] == 'create':
+            item.pop('type')
             create_machine(item)
         elif item['type'] == 'delete':
             delete_machine(item['machine_name'])
