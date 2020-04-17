@@ -1,5 +1,5 @@
 import yaml
-from flask import Flask, jsonify, request, escape
+from flask import Flask, jsonify, request, escape, abort
 import rc
 from rc import run
 from queue import Queue
@@ -20,6 +20,7 @@ for mg in config['machine_groups']:
     machine_groups[mg['name']] = mg
 
 machines = SqliteDict('./machines.sqlite', autocommit=True)
+print(machines)
 
 task_queue = Queue()
 
@@ -114,7 +115,16 @@ def status():
 
 @app.route('/machines', methods=['GET'])
 def list_machines():
-    return jsonify(machines)
+    return jsonify(list(machines.iteritems()))
+
+
+@app.route('/machines/<name>', methods=['GET'])
+def get_machine(name):
+    machine = machines.get(name)
+    if machine:
+        return jsonify(machines.get(name))
+    else:
+        abort(404)
 
 
 @app.route('/machines', methods=['POST'])
@@ -133,11 +143,8 @@ def request_machine():
     return jsonify({"machine_name": machine_name})
 
 
-@app.route('/machines', methods=['DELETE'])
-def release_machine():
-    data = request.get_json()
-    name = data.get("machine_name")
-
+@app.route('/machines/<name>', methods=['DELETE'])
+def release_machine(name):
     task_queue.put({"type": "delete",
                     "machine_name": name})
     return jsonify(None)
