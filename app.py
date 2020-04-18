@@ -1,3 +1,4 @@
+from gevent.pywsgi import WSGIServer
 import yaml
 from flask import Flask, jsonify, request, escape, abort
 import rc
@@ -71,7 +72,10 @@ def create_machine(item):
     except:
         print(f'Error creating machine: {name}')
         print(sys.exc_info())
-        del machines[name]
+        try:
+            del machines[name]
+        except KeyError:
+            pass
 
 
 def delete_machine(name):
@@ -87,9 +91,12 @@ def delete_machine(name):
             print(f'Success deleting machine: {name}')
         except:
             print(f'Warning: Failed to delete machine {name}')
-            print(sys.exc_info()[0])
+            print(sys.exc_info())
         finally:
-            del machines[name]
+            try:
+                del machines[name]
+            except KeyError:
+                pass
 
 
 def worker():
@@ -97,18 +104,22 @@ def worker():
         item = task_queue.get()
         if item is None:
             break
-        if item['type'] == 'create':
-            item.pop('type')
-            create_machine(item)
-        elif item['type'] == 'delete':
-            delete_machine(item['machine_name'])
-        task_queue.task_done()
+        try:
+            if item['type'] == 'create':
+                item.pop('type')
+                create_machine(item)
+            elif item['type'] == 'delete':
+                delete_machine(item['machine_name'])
+        except:
+            print(sys.exc_info())
+        finally:
+            task_queue.task_done()
 
 
 num_worker_threads = 10
 threads = []
 for i in range(num_worker_threads):
-    t = threading.Thread(target=worker)
+    t = threading.Thread(target=worker, daemon=True)
     t.start()
     threads.append(t)
 
@@ -175,3 +186,10 @@ def atexit_cleanup():
 
 
 atexit.register(atexit_cleanup)
+
+http_server = WSGIServer(('', 5000), app)
+
+try:
+    http_server.serve_forever()
+except KeyboardInterrupt:
+    pass

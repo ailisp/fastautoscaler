@@ -9,6 +9,7 @@ pyyaml = "*"
 flask = "*"
 sqlitedict = "*"
 pytimeparse = "*"
+gevent = "*"
 
 [dev-packages]
 autopep8 = "*"
