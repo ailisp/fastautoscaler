@@ -119,7 +119,7 @@ def worker():
 num_worker_threads = 10
 threads = []
 for i in range(num_worker_threads):
-    t = threading.Thread(target=worker, daemon=True)
+    t = threading.Thread(target=worker, daemon=False)
     t.start()
     threads.append(t)
 
