@@ -16,8 +16,34 @@ Compare to Cloud's built-in GCloud Managed Instances Group autoscaling and AWS C
 
 # Usage
 
-Copy config.yml.example to config.yml and run
+Before dockerfile (wip) is ready, it's a little bit complicated to deploy this autoscaler:
+- Install gcloud cli, aws cli, digitalocean cli and azure cli and login. (Only need to install cloud providers in your config)
+- Install pyenv, pipenv
+Copy config.yml.example to config.yml and run.
+```
+pipenv sync
+nohup pipenv run python app.py
+```
 
 # Config file
 
+TODO, see config.yml.example for now
+
 # API
+```
+POST /machines
+body:
+{
+  group_name: string
+  init_script?: string
+}
+response:
+{
+  machine_name: string
+}
+
+DELETE /machines/:machine_name
+
+GET /machines
+GET /machines/:machine_name
+```
