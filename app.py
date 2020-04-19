@@ -25,6 +25,8 @@ print(list(machines.iterkeys()))
 
 task_queue = Queue()
 
+timeout_threads = {}
+
 
 def get_machines_in_group(group_name):
     ret = []
@@ -66,7 +68,10 @@ def create_machine(item):
         if type(timeout) is str:
             timeout = timeparse(timeout)
         if timeout:
-            threading.Timer(timeout, delete_machine, [name]).start()
+            t = threading.Timer(timeout, delete_machine, [
+                name, f'Deleting machine {name} due to timeout'])
+            timeout_threads[name] = t
+            t.start()
 
         print(f'Success creating machine: {name}')
     except:
@@ -78,25 +83,36 @@ def create_machine(item):
             pass
 
 
-def delete_machine(name):
+def delete_machine(name, msg=None):
+    if msg is None:
+        msg = f'Deleting machine {name}...'
     if machines.get(name):
         machine = machines[name]
         machine['status'] = 'deleting'
         machines[name] = machine
 
-        print(f'Deleting machine {name}')
+        print(msg)
         provider = getattr(rc, machine['machine_group']['provider'])
         try:
-            provider.get(name).delete()
+            m = provider.get(name)
+            if m:
+                m.delete()
             print(f'Success deleting machine: {name}')
         except:
-            print(f'Warning: Failed to delete machine {name}')
-            print(sys.exc_info())
+            m = provider.get(name)
+            if m:
+                print(f'Warning: Failed to delete machine {name}')
+                print(sys.exc_info())
         finally:
             try:
                 del machines[name]
+                print(f'delete {name} from sqlite db')
             except KeyError:
                 pass
+    try:
+        del timeout_threads[name]
+    except KeyError:
+        pass
 
 
 def worker():
@@ -119,7 +135,7 @@ def worker():
 num_worker_threads = 10
 threads = []
 for i in range(num_worker_threads):
-    t = threading.Thread(target=worker, daemon=False)
+    t = threading.Thread(target=worker, daemon=True)
     t.start()
     threads.append(t)
 
@@ -172,6 +188,8 @@ def release_machine(name):
 
 def atexit_cleanup():
     print('Drain task_queue')
+    for _, t in timeout_threads.items():
+        t.cancel()
     try:
         while task_queue.get(block=False):
             task_queue.task_done()
