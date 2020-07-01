@@ -1,15 +1,26 @@
 auth_token: "81d659afb19b99c72eeab442d669634c"
 machine_groups:
-  - name: testqueue
+  - name: bridge
     provider: gcloud
     timeout: "30m"
-    max: 10
+    max: 20
     spec:    
       disk_size: "100G"
       machine_type: n1-standard-4
       zone: us-west2-a
-      image_project: ubuntu-os-cloud
-      image_family: ubuntu-1804-lts
+      image_project: near-core
+      image_family: near-ci
+      reserve_ip: false
+  - name: bridge-expensive
+    provider: gcloud
+    timeout: "30m"
+    max: 5
+    spec:
+      disk_size: "100G"
+      machine_type: n1-standard-32
+      zone: us-central1-c
+      image_project: near-core
+      image_family: near-ci
       reserve_ip: false
   - name: cheap
     provider: aws
