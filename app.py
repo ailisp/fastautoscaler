@@ -38,7 +38,7 @@ def get_machines_in_group(group_name):
 
 def get_machine_name_by_ip(ip):
     for _, m in machines.iteritems():
-        if m.ip == ip:
+        if m.get('ip')== ip:
             return m
 
 
@@ -56,7 +56,7 @@ def create_machine(item):
     machines[name] = {'status': 'creating', **item}
     try:
         print(f'Creating machine {name}')
-        getattr(rc, mg['provider']).create(
+        machine_obj = getattr(rc, mg['provider']).create(
             name=name, **mg['spec'])
         created_at = datetime.datetime.utcnow()
         init_script = item.get('init_script')
@@ -68,7 +68,8 @@ def create_machine(item):
             if p.returncode != 0:
                 raise Exception(p.stderr)
         machines[name] = {
-            'status': 'running', **item, 'created_at': datetime.datetime.utcnow().isoformat() + created_at.isoformat() + 'Z'}
+            'status': 'running', **item, 'created_at': datetime.datetime.utcnow().isoformat() + created_at.isoformat() + 'Z',
+            'ip': machine_obj.ip}
         timeout = mg.get('timeout')
         if type(timeout) is str:
             timeout = timeparse(timeout)
