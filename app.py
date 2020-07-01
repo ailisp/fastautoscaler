@@ -12,6 +12,7 @@ import datetime
 import sys
 from pytimeparse.timeparse import timeparse
 import atexit
+import traceback
 
 app = Flask(__name__)
 
@@ -37,9 +38,9 @@ def get_machines_in_group(group_name):
 
 
 def get_machine_name_by_ip(ip):
-    for _, m in machines.iteritems():
-        if m['ip'] == ip:
-            return m
+    for name in machines.keys():
+        if machines[name]['ip'] == ip:
+            return name
 
 
 def create_machine(item):
@@ -82,7 +83,7 @@ def create_machine(item):
         print(f'Success creating machine: {name}')
     except:
         print(f'Error creating machine: {name}')
-        print(sys.exc_info())
+        traceback.print_exc()
         try:
             del machines[name]
         except KeyError:
@@ -108,7 +109,7 @@ def delete_machine(name, msg=None):
             m = provider.get(name)
             if m:
                 print(f'Warning: Failed to delete machine {name}')
-                print(sys.exc_info())
+                traceback.print_exc()
         finally:
             try:
                 del machines[name]
