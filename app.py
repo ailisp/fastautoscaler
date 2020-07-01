@@ -39,7 +39,6 @@ def get_machines_in_group(group_name):
 
 def get_machine_name_by_ip(ip):
     for name in machines.keys():
-        print(machines[name])
         if machines[name]['ip'] == ip:
             return name
 
