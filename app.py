@@ -140,7 +140,7 @@ def worker():
             task_queue.task_done()
 
 
-num_worker_threads = 10
+num_worker_threads = 20
 threads = []
 for i in range(num_worker_threads):
     t = threading.Thread(target=worker, daemon=True)
@@ -178,7 +178,6 @@ def request_machine():
     init_script = data.get("init_script")
 
     mg = machine_groups[name]
-    provider = mg['provider']
     machine_name = new_machine_name(name)
     task_queue.put({"type": "create",
                     "machine_name": machine_name,
