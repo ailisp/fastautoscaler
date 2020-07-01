@@ -137,7 +137,7 @@ def worker():
                 name = get_machine_name_by_ip(item['ip'])
                 delete_machine(name)
         except:
-            print(sys.exc_info())
+            traceback.print_exc()
         finally:
             task_queue.task_done()
 
