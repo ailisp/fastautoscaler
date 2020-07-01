@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-python-rc = "*"
+python-rc = "==0.3.9"
 pyyaml = "*"
 flask = "*"
 sqlitedict = "*"

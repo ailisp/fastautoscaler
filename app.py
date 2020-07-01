@@ -36,6 +36,12 @@ def get_machines_in_group(group_name):
     return ret
 
 
+def get_machine_name_by_ip(ip):
+    for _, m in machines.iteritems():
+        if m.ip == ip:
+            return m
+
+
 def create_machine(item):
     mg = item.get('machine_group')
     max_machines = mg.get('max')
@@ -58,8 +64,7 @@ def create_machine(item):
             machines[name] = {
                 'status': 'initializing', **item
             }
-            p = getattr(rc, mg['provider']).get(name).run(
-                'bash', input=f'set -euo pipefail\n{init_script}')
+            p = getattr(rc, mg['provider']).get(name).bash(f'set -euo pipefail\n{init_script}')
             if p.returncode != 0:
                 raise Exception(p.stderr)
         machines[name] = {
@@ -126,6 +131,9 @@ def worker():
                 create_machine(item)
             elif item['type'] == 'delete':
                 delete_machine(item['machine_name'])
+            elif item['type'] == 'delete_by_ip':
+                name = get_machine_name_by_ip(item['ip'])
+                delete_machine(name)
         except:
             print(sys.exc_info())
         finally:
@@ -183,6 +191,13 @@ def request_machine():
 def release_machine(name):
     task_queue.put({"type": "delete",
                     "machine_name": name})
+    return jsonify(None)
+
+
+@app.route('/machines/ip/<name>', methods=['DELETE'])
+def release_machine_by_ip(ip):
+    task_queue.put({"type": "delete_by_ip",
+                    "ip": ip})
     return jsonify(None)
 
 
