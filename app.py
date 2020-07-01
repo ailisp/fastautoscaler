@@ -193,7 +193,7 @@ def release_machine(name):
     return jsonify(None)
 
 
-@app.route('/machines/ip/<name>', methods=['DELETE'])
+@app.route('/machines/ip/<ip>', methods=['DELETE'])
 def release_machine_by_ip(ip):
     task_queue.put({"type": "delete_by_ip",
                     "ip": ip})
