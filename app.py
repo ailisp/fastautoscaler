@@ -64,7 +64,7 @@ def create_machine(item):
         init_script = item.get('init_script')
         if init_script:
             machines[name] = {
-                'status': 'initializing', **item
+                'status': 'initializing', **item, ip:''
             }
             p = getattr(rc, mg['provider']).get(name).bash(f'set -euo pipefail\n{init_script}')
             if p.returncode != 0:
