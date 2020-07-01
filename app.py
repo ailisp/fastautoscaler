@@ -38,7 +38,7 @@ def get_machines_in_group(group_name):
 
 def get_machine_name_by_ip(ip):
     for _, m in machines.iteritems():
-        if m.get('ip')== ip:
+        if m['ip'] == ip:
             return m
 
 
@@ -53,7 +53,7 @@ def create_machine(item):
             print(
                 f'Already have {max_machines} machines for group {mg["name"]}, wait until there is space')
             return
-    machines[name] = {'status': 'creating', **item}
+    machines[name] = {'status': 'creating', **item, ip:''}
     try:
         print(f'Creating machine {name}')
         machine_obj = getattr(rc, mg['provider']).create(
