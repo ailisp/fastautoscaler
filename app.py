@@ -53,7 +53,7 @@ def create_machine(item):
             print(
                 f'Already have {max_machines} machines for group {mg["name"]}, wait until there is space')
             return
-    machines[name] = {'status': 'creating', **item, ip:''}
+    machines[name] = {'status': 'creating', **item, 'ip':''}
     try:
         print(f'Creating machine {name}')
         machine_obj = getattr(rc, mg['provider']).create(
