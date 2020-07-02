@@ -66,8 +66,8 @@ def create_machine(item):
                 'status': 'initializing', **item, 'ip':''
             }
             p = getattr(rc, mg['provider']).get(name).bash(f'set -euo pipefail\n{init_script}')
-            if p.returncode != 0:
-                raise Exception(p.stderr)
+            # if p.returncode != 0:
+            #     raise Exception(p.stderr)
         machines[name] = {
             'status': 'running', **item, 'created_at': datetime.datetime.utcnow().isoformat() + created_at.isoformat() + 'Z',
             'ip': machine_obj.ip}
