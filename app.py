@@ -69,6 +69,15 @@ def create_machine(item):
             if p.returncode != 0:
                 print(f'exit code: {p.returncode}')
                 print(p.stderr)
+            retries = 3
+            while p.returncode == 255:
+                p = getattr(rc, mg['provider']).get(name).bash(f'set -euo pipefail\n{init_script}')
+                if p.returncode != 0:
+                    print(f'exit code: {p.returncode}')
+                    print(p.stderr)
+                if retries == 0:
+                    break
+                retries -= 1
         machines[name] = {
             'status': 'running', **item, 'created_at': datetime.datetime.utcnow().isoformat() + created_at.isoformat() + 'Z',
             'ip': machine_obj.ip}
