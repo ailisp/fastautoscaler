@@ -11,7 +11,7 @@ Compare to Cloud's built-in GCloud Managed Instances Group autoscaling and AWS C
   - Fast Autoscaler creates exactly number of instance you need.
   - AWS Cloud Formation must be configured to create N instance a time. If you need less than N instances, more instances are wasted and have to shutdown. If you need more than N instances, you need to wait another 3-5 minutes to trigger another scaling event.
 - Simple and straight forward control with config file and API
-- (WIP) Support major cloud providers, include those don't have a builtin autoscaler: GCloud, AWS, Azure and DigitalOcean
+- Support major cloud providers, include those don't have a builtin autoscaler: GCloud, AWS, Azure and DigitalOcean
 - (WIP) Easy to deploy: a docker container + a config file
 
 # Usage
@@ -43,6 +43,8 @@ response:
 }
 
 DELETE /machines/:machine_name
+
+DELETE /machines/ip/:machine_ip
 
 GET /machines
 GET /machines/:machine_name
